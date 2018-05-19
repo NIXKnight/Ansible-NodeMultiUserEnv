@@ -1,0 +1,19 @@
+dependencies: []
+galaxy_info:
+  author: Saad Ali
+  description: Install and configure a multi-user NodeJS environment.
+  license: license (MIT)
+  min_ansible_version: 2.5
+  platforms:
+  - name: Debian
+    versions:
+      - jessie
+      - stretch
+  - name: Ubuntu
+    versions:
+      - trusty
+      - xenial
+  galaxy_tags:
+    - server
+    - nodejs
+    - multi-user
