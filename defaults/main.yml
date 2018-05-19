@@ -1,2 +1,7 @@
 ---
 # defaults file for Ansible-NodeMultiUserEnv
+NODE_VERSION: "node_8.x"
+INSTALL_NODEJS: True
+MODIFY_SYSTEM_SKEL: True
+MODIFY_USER_ENV: False
+ENABLE_SRC_REPO: False

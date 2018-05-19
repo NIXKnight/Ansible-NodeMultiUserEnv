@@ -1,0 +1,2 @@
+deb https://deb.nodesource.com/{{ NODE_VERSION }} {{ ansible_distribution_release }} main
+{% if ENABLE_SRC_REPO == True %}deb-src https://deb.nodesource.com/{{ NODE_VERSION }} {{ ansible_distribution_release }} main{% else %}# deb-src https://deb.nodesource.com/{{ NODE_VERSION }} {{ ansible_distribution_release }} main{% endif %}

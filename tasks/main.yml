@@ -1,2 +1,97 @@
 ---
 # tasks file for Ansible-NodeMultiUserEnv
+- name: Ensure APT HTTPS Transport is Present
+  apt:
+    pkg: apt-transport-https
+    state: present
+    update_cache: yes
+  when: ansible_os_family == 'Debian' and (INSTALL_NODEJS)
+
+- name: Add NodeJS APT Key
+  apt_key:
+      url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+      state: present
+  when: ansible_os_family == 'Debian' and (INSTALL_NODEJS)
+
+- name: Add NodeJS Repository
+  template:
+    src: templates/nodesource.list.j2
+    dest: /etc/apt/sources.list.d/nodesource.list
+  when: ansible_os_family == 'Debian' and (INSTALL_NODEJS)
+
+- name: Install NodeJS
+  apt:
+    pkg: nodejs
+    state: present
+    update_cache: yes
+  when: ansible_os_family == 'Debian' and (INSTALL_NODEJS)
+
+- name: Add .npm Directory to Skeleton
+  file:
+    path: /etc/skel/.npm
+    state: directory
+    mode: 0755
+  when: ansible_os_family == 'Debian' and (MODIFY_SYSTEM_SKEL)
+
+- name: Add .npmrc File to Skeleton
+  file:
+    path: /etc/skel/.npmrc
+    state: touch
+    mode: 0644
+  when: ansible_os_family == 'Debian' and (MODIFY_SYSTEM_SKEL)
+
+- name: Add .npm Prefix to .npmrc in Skeleton
+  lineinfile:
+    path: /etc/skel/.npmrc
+    line: 'prefix = ${HOME}/.npm'
+  when: ansible_os_family == 'Debian' and (MODIFY_SYSTEM_SKEL)
+
+- name: Modify User Environment in Skeleton
+  blockinfile:
+    path: /etc/skel/.profile
+    block: |
+      NPM_DIR="$HOME/.npm"
+      PATH="$NPM_DIR/bin:$PATH"
+      unset MANPATH
+      MANPATH="$NPM_DIR/share/man:$(manpath)"
+      NODE_PATH="$NPM_DIR/lib/node_modules:$NODE_PATH"
+  when: ansible_os_family == 'Debian' and (MODIFY_SYSTEM_SKEL)
+
+- name: Add .npm Directory to User Home
+  file:
+    path: /home/{{ item }}/.npm
+    state: directory
+    mode: 0755
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  with_items: "{{ USERS }}"
+  when: ansible_os_family == 'Debian' and (MODIFY_USER_ENV)
+
+- name: Add .npmrc File to User Home
+  file:
+    path: /home/{{ item }}/.npmrc
+    state: touch
+    mode: 0644
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  with_items: "{{ USERS }}"
+  when: ansible_os_family == 'Debian' and (MODIFY_USER_ENV)
+
+- name: Add .npm Prefix to .npmrc in User Home
+  lineinfile:
+    path: /home/{{ item }}/.npmrc
+    line: 'prefix = ${HOME}/.npm'
+  with_items: "{{ USERS }}"
+  when: ansible_os_family == 'Debian' and (MODIFY_USER_ENV)
+
+- name: Modify User Environment in User Home
+  blockinfile:
+    path: /home/{{ item }}/.profile
+    block: |
+      NPM_DIR="$HOME/.npm"
+      PATH="$NPM_DIR/bin:$PATH"
+      unset MANPATH
+      MANPATH="$NPM_DIR/share/man:$(manpath)"
+      NODE_PATH="$NPM_DIR/lib/node_modules:$NODE_PATH"
+  with_items: "{{ USERS }}"
+  when: ansible_os_family == 'Debian' and (MODIFY_USER_ENV)
